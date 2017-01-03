@@ -1,0 +1,59 @@
+---
+title: "ChickWeight visualization examples"
+date: "`r format(Sys.time(), '%d %b %Y')`"
+author: agrou
+output: ioslides_presentation
+---
+
+## Visualizing ChickWeight data 
+
+##### This is an example of using plotly with ChickWeight data, directly loaded from the package 'datasets' available on R studio. 
+
+```{r, include = FALSE, message = FALSE, warning = FALSE, echo = FALSE}
+library(plotly)
+library(dplyr)
+```
+
+----
+
+Visualize chicken's weight over time, for the 4 diets
+
+```{r, message = FALSE, warning = FALSE, echo = FALSE}
+plot_ly(ChickWeight, x = ~Time, y = ~weight, mode = "markers", 
+        color = ~as.factor(Diet), size = ~weight)
+```
+
+----
+
+Plot the distribution of chicken's weight  
+```{r, message = FALSE, warning = FALSE, echo = FALSE}
+plot_ly(ChickWeight, x = ~weight, type = "histogram")
+```
+
+----
+
+Visualize chicken weight distribution by diet 
+```{r, message = FALSE, warning = FALSE, echo = FALSE}
+plot_ly(ChickWeight, y = ~weight, color = ~Diet, type = "box")
+```
+
+----
+
+Visualizing differences in chicken's weight over time between the 4 diets
+```{r, message = FALSE, warning = FALSE, echo = FALSE}
+ggplotly(ggplot(data = ChickWeight, aes(x = Time, y = weight)) + 
+           geom_point(aes(text = paste("Chick:", Chick)), size = 2) + 
+           stat_smooth(aes(colour = Diet)) + facet_wrap(~ Diet))
+```
+
+```{r, echo = FALSE, eval = FALSE, warning= FALSE}
+p <- ggplot(data = ChickWeight, aes(x = Time, y = weight)) + 
+  geom_point(aes(text = paste("Chick:", Chick)), size = 2) + 
+  stat_smooth(aes(colour = Diet)) + facet_wrap(~ Diet)
+gg <- ggplotly(p)
+gg
+
+#plotly_POST(gg)
+```
+
+
