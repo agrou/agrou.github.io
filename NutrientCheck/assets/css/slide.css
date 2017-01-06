@@ -1,0 +1,15 @@
+
+  .title-slide {
+    background-color: #116963;
+  }
+.title-slide hgroup > h1{
+  font-family: 'Rockwell', 'Open Sans';
+  color: #FFFFFF;
+}
+
+.title-slide hgroup > h2 {
+  font-family: 'Rockwell', 'Open Sans';
+  color: #FFFFFF  !important;
+}
+
+
