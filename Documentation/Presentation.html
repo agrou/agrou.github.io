@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NutrientCheck App</title>
+  <meta charset="utf-8">
+  <meta name="description" content="NutrientCheck App">
+  <meta name="author" content="">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="libraries/widgets/bootstrap/css/bootstrap.css"></link>
+<link rel=stylesheet href="./assets/css/slide.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>NutrientCheck App</h1>
+    <h2>06 Janeiro 2017</h2>
+    <p><br/></p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <hgroup>
+    <h2>Introduction</h2>
+  </hgroup>
+  <article data-timings="">
+    <p><strong>NutrientCheck</strong> is a Shiny web application to help you visualize the nutrient content of food.</p>
+
+<p><strong>Aim:</strong> Check the nutritional content of one or more food ingredients. </p>
+
+<p><strong>Data Source</strong>: <a href="https://github.com/56north/NutrientData">package NutrientData</a> contains data from the composition of foods (USDA National Nutrient Database). </p>
+
+<p><img src="assets/img/NutrientCheck.png" title="plot of chunk NutritionApp" alt="plot of chunk NutritionApp" width="600px" /></p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-2" style="background:;">
+  <hgroup>
+    <h2>Brief explanation of the Shiny App</h2>
+  </hgroup>
+  <article data-timings="">
+    <ol>
+<li>Data Processing</li>
+</ol>
+
+<p>Data (&#39;ABBREV&#39;) was manipulated to select just some variables (nutrients) as an example. 
+A calculation for the nutrient content of household portions was added as well as for the quantity inputed by the user.</p>
+
+<ol>
+<li>UI/Server</li>
+</ol>
+
+<p>UI has 4 input &#39;fields&#39; and 1 action button, to update information as the input changes. 
+Server defines how the plot and the table are presented, with conditions to filter observations or calculate new data, dependent on the user input.</p>
+
+<ol>
+<li>App Interface</li>
+</ol>
+
+<p>Allows the user to choose between visualizing nutrient content of 1 or more foods, for <strong>standard portion sizes</strong> or for <strong>household portion size</strong> or even for a self input, that I called <strong>dynamic portion size</strong>.</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-3" style="background:;">
+  <hgroup>
+    <h2>Instructions</h2>
+  </hgroup>
+  <article data-timings="">
+    <ol>
+<li>The app starts with two examples of ingredients, you can erase it and write down your own search. </li>
+</ol>
+
+<p>Click on <strong>&#39;Update View&#39;</strong> button to activate new display.</p>
+
+<p>2: Select your food ingredient (one or more)</p>
+
+<p>3: Select one nutrient</p>
+
+<p>4: Choose how you want to see the information in the plot, selecting one of the 3 options of &#39;Choose a portion size&#39;:</p>
+
+<ul>
+<li>&#39;Standard&#39;: 100g for each ingredient. </li>
+<li>&#39;Household&#39;: This measure is different for each food ingredient and depends on the purpose of use for the ingredient. Be aware that you will be comparing food for different portion sizes.</li>
+<li>&#39;Dynamic&#39;: select the quantity you want but, on the opposite of the &#39;Household&#39; option, this will define the same quantity for all the selected food ingredients. </li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  <hgroup>
+    <h2>Limitations</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Be aware that the ideal is to have a selection of a specific quantity for each food ingredient. In this case it is recommended to use the &#39;Dynamic&#39; option considering
+that the selected quantity will not be realistic for every type of food.</p>
+
+<p><strong>Find out more about this app on the link below:</strong></p>
+
+<p><a href="https://github.com/agrou/agrou.github.io/NutrientCheck">https://github.com/agrou/agrou.github.io/NutrientCheck</a></p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='Introduction'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='Brief explanation of the Shiny App'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='Instructions'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='Limitations'>
+         4
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  <script src="libraries/widgets/bootstrap/js/bootstrap.min.js"></script>
+<script src="libraries/widgets/bootstrap/js/bootbox.min.js"></script>
+
+  <!-- MathJax: Fall back to local if CDN offline but local image fonts are not supported (saves >100MB) -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        processEscapes: true
+      }
+    });
+  </script>
+  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <!-- <script src="https://c328740.ssl.cf1.rackcdn.com/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script> -->
+  <script>window.MathJax || document.write('<script type="text/x-mathjax-config">MathJax.Hub.Config({"HTML-CSS":{imageFont:null}});<\/script><script src="libraries/widgets/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"><\/script>')
+</script>
+<script>  
+  $(function (){ 
+    $("#example").popover(); 
+    $("[rel='tooltip']").tooltip(); 
+  });  
+  </script>  
+  <!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>
