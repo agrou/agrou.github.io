@@ -2,7 +2,9 @@
 title: "App Documentation"
 author: "agrou"
 date: "January 5, 2017"
-output: html_document
+output:
+  html_document:
+    mathjax: null
 ---
 
 ## NutrientCheck App Documentation
