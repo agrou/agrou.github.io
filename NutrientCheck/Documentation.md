@@ -12,13 +12,12 @@ This is a Shiny web application to help you visualize the nutrient content of yo
 Find out more about this app on the link below:
 
 To run the app on your computer, open R studio and copy this code to your R console:
-```{r, echo = TRUE, eval = FALSE}
 
+```r
 library(shiny)
 
 runGitHub("agrou.github.io", username = "agrou", 
           ref ="master", subdir = "/NutrientCheck/NutrientCheck_App")
-
 ```
 
 https://github.com/agrou/agrou.github.io/tree/master/NutrientCheck
