@@ -19,7 +19,8 @@
 # https://github.com/56north/NutrientData/blob/master/data/ABBREV.rda
 
 ## Load the data
-data("ABBREV")
+#data("ABBREV")
+load("assets/ABBREV.rda", envir = .GlobalEnv)
 
 # or download the R Package NutrientData, available on
 # github: https://github.com/56north/NutrientData
@@ -49,21 +50,24 @@ library(plotly)
 # ingredient. In this case it is recommended to use the 'Dynamic' option considering
 # that the selected quantity will not be realistic for every type of food.
 
-NutData <- ABBREV %>% # create a new dataset with variables of interest
-  # select only some nutrients for this example, and rename the variables
-  select(NDB_No, Food = Shrt_Desc, Calories = Energ_Kcal, Protein = `Protein_(g)`,
-         Total_Lipids = `Lipid_Tot_(g)`, SatFat = `FA_Sat_(g)`,
-         MUFAs = `FA_Mono_(g)`, PUFAs = `FA_Poly_(g)`, Carbohydrates = `Carbohydrt_(g)`,
-         Fiber = `Fiber_TD_(g)`, Sugar = `Sugar_Tot_(g)`, Calcium = `Calcium_(mg)`,
-         Iron = `Iron_(mg)`, VitC = `Vit_C_(mg)`, VitB12 = contains("Vit_B12"),
-         Portion = GmWt_1) %>%
-  mutate(Food = toupper(Food)) %>% #get the food names all into the same format
-  # make data into a long format to enable filtering specific nutrients
-  gather("Nutrient", "Standard Portion", 3:15) %>%
-  # Calculate nutrient content for household portion sizes
-  mutate(`Household Portion` = round(Portion * `Standard Portion` / 100, 3))
+#print(str(ABBREV))
+assign("NutData", 
+  ABBREV %>% # create a new dataset with variables of interest
+    # select only some nutrients for this example, and rename the variables
+    select(NDB_No, Food = Shrt_Desc, Calories = Energ_Kcal, Protein = `Protein_(g)`,
+           Total_Lipids = `Lipid_Tot_(g)`, SatFat = `FA_Sat_(g)`,
+           MUFAs = `FA_Mono_(g)`, PUFAs = `FA_Poly_(g)`, Carbohydrates = `Carbohydrt_(g)`,
+           Fiber = `Fiber_TD_(g)`, Sugar = `Sugar_Tot_(g)`, Calcium = `Calcium_(mg)`,
+           Iron = `Iron_(mg)`, VitC = `Vit_C_(mg)`, VitB12 = contains("Vit_B12"),
+           Portion = GmWt_1) %>%
+    mutate(Food = toupper(Food)) %>% #get the food names all into the same format
+    # make data into a long format to enable filtering specific nutrients
+    gather("Nutrient", "Standard Portion", 3:15) %>%
+    # Calculate nutrient content for household portion sizes
+    mutate(`Household Portion` = round(Portion * `Standard Portion` / 100, 3))
+  , envir = .GlobalEnv)
 
-#print(str(NutData)) ,unselect this command if you want to have a look at the dataset
+#print(str(NutData)) #,unselect this command if you want to have a look at the dataset
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
