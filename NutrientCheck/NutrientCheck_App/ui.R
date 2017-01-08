@@ -72,7 +72,7 @@ assign("NutData",
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
 
-  titlePanel(div(strong("Nutrient Check"), style ="color: #116963;")),
+  titlePanel(div(strong("Nutrient Check"), style ="color: #116963;"), windowTitle = "Nutrient Check"),
     br(),
   sidebarLayout(
 
