@@ -1,0 +1,10 @@
+name: NutrientCheck_App
+title: NutrientCheck_App
+account: agrou
+server: shinyapps.io
+appId: 149795
+bundleId: 673176
+url: https://agrou.shinyapps.io/nutrientcheck_app/
+when: 1483920017.29608
+asMultiple: FALSE
+asStatic: FALSE

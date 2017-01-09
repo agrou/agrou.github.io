@@ -7,10 +7,9 @@
 library(shiny)
 library(plotly)
 
-
-
 # Define server logic required to draw a bar plot
 shinyServer(function(input, output) {
+
   output$NutrientPlot <- renderPlotly({
 
     filtered <- NutData %>%
