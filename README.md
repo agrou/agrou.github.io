@@ -1,2 +1,6 @@
 # agrou.github.io
-Here's my github pages website.
+Welcome to my github pages.
+
+You can find some of my projects in this repository. 
+
+
