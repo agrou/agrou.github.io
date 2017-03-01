@@ -1,0 +1,210 @@
+---
+title: "Machine Learning Algorithm for Qualitative HAR of Weight Lifting Exercises"
+author: "agrou"
+date: "1 March 2017"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Executive Summary
+
+**Question**: How well do they do it? 
+
+**Goal:** use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants, from training data set, and predict with the "classe" variable or other variables the maner in which the participants did the exercise. Also use the model to predict 20 different test cases. 
+
+**Steps:**
+
+* Load and prepare data for analysis
+* Use different models to train the data (classification trees, linear discriminent analysis and random forests)
+* Test the models in 20 different cases 
+
+**Results**
+Fitting a random forest to the data gave better estimates for the prediction of the outcome, than a classification tree. Data processing and analysis followed instructions on the `References` section of this report.  
+
+## Background
+
+Six young health participants were asked to perform one set of 10 repetitions of the Unilateral Dumbbell Biceps Curl in five different fashions: exactly according to the specification (Class A), throwing the elbows to the front (Class B), lifting the dumbbell only halfway (Class C), lowering the dumbbell only halfway (Class D) and throwing the hips to the front (Class E).
+
+Read more: http://groupware.les.inf.puc-rio.br/har#weight_lifting_exercises#ixzz4ZyJOw3EZ
+
+## Data Processing
+
+**Read the data**
+```{r}
+file_train <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+train <- read.csv(file_train, na.strings = c("", "NA"))
+dim(train)
+
+file_test <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+test <- read.csv(file_test, na.strings = c("", "NA"))
+dim(test)
+```
+Both sets have 160 variables. The train set has 19622 observations and the test set has 20 observations. 
+```{r, message = FALSE, warning= FALSE}
+#Load required libraries
+library(tidyverse) 
+library(caret)
+library(rpart) 
+library(randomForest)
+library(rattle) 
+library(rpart.plot)
+```
+
+**Clean the data**
+```{r}
+# percentage of missing data for each column in the data set
+training <- train %>% select(which(colMeans(is.na(.)) < 0.5)) # get only the columns with less than 50% of missing values in the train set
+testing <- test %>% select(which(colMeans(is.na(.)) < 0.5)) # get only the columns with less than 50% of missing values in the test set
+
+dim(training); dim(testing) #dimensions of each data set
+```
+After removing most missing values from the data sets, both training and testing data sets have 60 variables. `Training` has 19622 observations and `Testing`has 20 observations.
+
+```{r, eval = FALSE}
+str(training) #understand the structure of the data and which variables can be excluded for the data modelling purpose
+```
+According to [documentation](http://groupware.les.inf.puc-rio.br/public/papers/2013.Velloso.QAR-WLE.pdf) available for this subject, we can consider for this exercise variables that were used to predict performance of the participants exercise. Thus we exclude the first variables in each data set.
+
+```{r}
+xnames <- colnames(training)[1:7] #select first 7 variables from the training set
+featurePlot(x = training[, xnames], y = training$classe, plot = "pairs") #The feature plot confirms little predictive power from these variables in the class outcome variable.
+
+mytrain <- training[!names(training) %in% xnames] # remove first variables from training data
+mytest <- testing[!names(testing) %in% xnames] # remove first variables from testing data
+
+dim(mytrain)
+dim(mytest)
+```
+Training data is now `mytrain` with 53 predictors and testing data is now `mytest` with 53 variables. Both data sets keep the number of observations.
+
+
+## Exploratory data analysis
+```{r}
+# Understand the outcome variable distribution
+Count <- table(mytrain$classe)
+Frequency <- paste(round((Count) / length(mytrain$classe) * 100), "%", sep ="")
+pander::pander(rbind(Count, Frequency))
+```
+
+```{r, tidy = TRUE, message = FALSE}
+library(scales)
+index <- seq_along(1:nrow(mytrain))
+ggplot(data = mytrain, aes(x = index, colour = classe)) +
+        geom_density(aes(y = ..count../sum(..count..) * 100)) + 
+        #geom_text(aes(y = ..count../sum(..count..) * 100), 
+                     # label = ..count../sum(..count..) * 100) + 
+        scale_y_continuous(labels = scales::percent) + 
+        labs(title = "Classes distribution on the training data set", y = "Frequency", x = "data set index") + 
+        theme_bw() 
+```
+
+More counts are expected for classe A and a balanced number of occurencies for the other classes.
+
+## Machine Learning
+
+**Data partition**
+
+Next, `mytrain` is splitted 70% into a training set and 30% for testing set, to avoid sampling errors when predicting the outcome. 
+
+```{r}
+# set the seed for reproducibility of the analysis
+set.seed(12345)
+inTrain <- createDataPartition(mytrain$classe, p = 0.7, 
+                               list = FALSE)
+toTrain <- mytrain[inTrain, ]
+toTest <- mytrain[-inTrain,] # the remaining 30% of data training data appended to testing data
+```
+
+**Train the data with prediction algorithms**
+
+Since logist regression is applied to 2 class outcomes, we can fit a classification tree, a linear discriminent analysis (lda) and a random forest predictor relating the factor variable `classe` to the remaining variables.
+
+First we fit a classification tree with cross validation and pre-processing.
+```{r}
+# fit rpart model 
+control <- trainControl(method = "cv", number = 5) #apply cross validation
+rpart_model <- train(classe ~ ., data = toTrain, method = "rpart", trControl = control)
+rpart_model
+
+rpart_model2 <- train(classe ~ ., data = toTrain, method = "rpart", preProcess = c("center", "scale")) #apply preprocessing to analyse differences in the accuracy of the model
+rpart_model2
+
+# Plot classification tree
+fancyRpartPlot(rpart_model$finalModel, palettes=c("Blues", "Greens"))
+```
+
+Accuracy is not different between pre-processing and cross-validation methods.
+
+```{r}
+# Predict the outcome using the test set
+rpart_pred <- predict(rpart_model, toTest)
+# Show prediction result
+rpart_cm <- confusionMatrix(toTest$classe, rpart_pred)
+rpart_cm
+```
+When testing the model in the testing part of the data, the accuracy rate of the classification tree is not very good to predict the outcome `classe`. Notice no prediction for class D. Thus we can apply another method.
+
+Secondly we can fit a linear discriminent analysis 
+```{r}
+# linear discriminent analysis
+lda_model <- train(classe ~ ., data = toTrain, method = "lda", preProcess = c("center", "scale"))
+lda_pred <- predict(lda_model, toTest) #predict in the testing part of the data set
+lda_cm <- confusionMatrix(toTest$classe, lda_pred) #get the estimates for the analysis
+lda_cm
+```
+The sensitivity and the accuracy improved with this model, but it is still worth to try to fit a Random forest
+
+```{r}
+# fit a Random forest 
+set.seed(12345)
+rf_model <- randomForest(classe ~ . , data = toTrain)
+```
+
+```{r}
+# test the Random forest model in the test set originated from data partition 
+rf_pred <- predict(rf_model, newdata = toTest)
+table(rf_pred) # outcome predictions with random forest model
+table(toTest$classe) # outcome in testing part of the data set
+
+rf_cm <- confusionMatrix(rf_pred, toTest$classe)
+rf_cm
+```
+
+```{r}
+plot(rf_model)
+```
+
+Random forests fit a better model to predict the outcome (activity), with better accuracy and sensitivity. The expected out-of-sample error is the remanescent `100-99.2 = 0.8%`.
+
+===============================================================================
+
+## Course Project Prediction Quiz Portion
+
+Apply the machine learning algorithm to the 20 test cases available in the test data and submit the predictions to the Course Project Prediction Quiz for automated grading
+
+## Prediction on 20 test cases 
+
+We can predict performance (the outcome `classe`) on the 20 cases available on the test data set.
+```{r}
+predict(rf_model, mytest)
+```
+
+## References
+
+The data for this project came from this source: http://groupware.les.inf.puc-rio.br/har. 
+
+Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013.
+
+Read more: http://groupware.les.inf.puc-rio.br/har#wle_paper_section#ixzz4ZtZIkJHv
+
+
+```{r, eval = FALSE}
+# count the words by adding a new Addin to Rstudio
+devtools::install_github("benmarwick/wordcountaddin", type = "source", dependencies = TRUE)
+```
