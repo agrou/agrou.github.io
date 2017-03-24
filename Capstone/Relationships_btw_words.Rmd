@@ -1,0 +1,132 @@
+---
+title: "Milestone report"
+subtitle: "Exploratory data analysis: Relationships between words""
+author: agrou
+date: "13 March 2017"
+---
+
+## Scope 
+Understand the distribution and relationship between the words, tokens and phares in the text and build a linguistic predictive model.
+
+## Tasks
+1. Exploratory Analysis
+2. Understand frequencies of words and words pairs 
+
+## Questions
+1. Some words are more frequent than others - what are the distributions of word frequencies?
+2. What are the frequencies of 2-grams and 3-grams in the dataset?
+3. How many unique words do you need in a frequency sorted dictionary to cover 50% of all word instances in the language? 90%?
+4. How do you evaluate how many of the words come from foreign languages?
+5. Can you think of a way to increase the coverage - identifying words that may not be in the corpora or using a smaller number of words in the dictionary to cover the same number of phrases?
+
+## Data
+
+Load the data
+```{r}
+# define the directory to store the zipfile
+destfile <- "/Users/andreia/Documents/Data_Science_Projects/Coursera/courses/Capstone/Data/Coursera-Swiftkey.zip"
+# save the URL with the zipfile
+fileUrl <- "https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip"
+# Download the zipfile
+download.file(url = fileUrl, destfile = destfile, method = "curl")
+```
+
+Load libraries
+```{r}
+library(tidyverse)
+library(purrr)
+library(tidytext)
+library(stringr)
+```
+
+Read the data
+```{r}
+# Load the three data sets together
+
+enUS_folder <- "Data/final/en_US/"
+ 
+read_folder <- function(infolder){
+        tibble(file = dir(infolder, full.names = TRUE)) %>%
+               mutate(text = map(file, read_lines)) %>%
+               transmute(id = basename(file), text) %>%
+               unnest(text)
+}
+
+files <- read_folder(enUS_folder)
+head(files)
+```
+
+Resample data for quicker analysis
+```{r}
+# resample data
+files3 <- files %>%
+        sample_frac(0.2) #resample data
+```
+
+Data Cleaning and Tokenization
+```{r, tidy = TRUE}
+# Data cleaning
+BcleanAll <- files3 %>%
+        mutate(id = str_replace_all(id, c("en_US.twitter.txt" = "Twitter", 
+                                             "en_US.news.txt" = "News",
+                                             "en_US.blogs.txt" = "Blogs")), 
+               text = str_replace_all(text, "\\d+", ""),
+               text = str_replace_all(text, "[\r?\n|\røØ]", " ")
+               ) %>%
+        # Tokenization into words
+        unnest_tokens(word, text) %>% # separate each line of text into word tokens %>%
+        filter(
+                str_detect(word, "[A-z]{1,}")
+                ,!str_detect(word, "[[:punct:]]")) %>% 
+        anti_join(stop_words)
+
+head(BcleanAll, 20)
+```
+
+==========================================================================================================
+
+## Exploratory analysis
+
+```{r}
+# most common words in the entire data set
+AllCounts <- BcleanAll %>%
+        group_by(id) %>% #comment to group the data and see the id for each dataset 
+        count(word, sort = TRUE) 
+
+head(AllCounts)
+```
+
+**1. Some words are more frequent than others - what are the distributions of word frequencies?**
+```{r}
+# Finding frequency of words within groups 
+tf_idf <- AllCounts %>%
+        bind_tf_idf(word, id, n) %>%
+        arrange(desc(tf_idf)) 
+
+head(tf_idf, 20)
+
+# Visualize top words within groups 
+
+tf_graph <- tf_idf %>%
+        group_by(id) %>%
+        top_n(12, tf_idf) %>%
+        mutate(word = reorder(word, tf_idf)) %>%
+        ggplot(aes(word, tf_idf, fill = id)) +
+        geom_bar(stat = "identity", show.legend = FALSE) +
+        facet_wrap(~ id, scales = "free") +
+        xlab("top words frequency within groups") +
+        coord_flip()
+
+tf_graph
+```
+
+==========================================================================================================
+## Understand frequencies of words and words pairs
+
+We've covered words as individual units and considered their frequencies to visualize which were the most common words in the three data  sets. Next step is to build figures and tables to understand variation in the frequencies of words and word pairs in the data.
+
+**2. What are the frequencies of 2-grams and 3-grams in the dataset?
+```{r}
+
+```
+
