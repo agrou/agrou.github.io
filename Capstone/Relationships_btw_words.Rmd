@@ -19,6 +19,11 @@ Understand the distribution and relationship between the words, tokens and phare
 4. How do you evaluate how many of the words come from foreign languages?
 5. Can you think of a way to increase the coverage - identifying words that may not be in the corpora or using a smaller number of words in the dictionary to cover the same number of phrases?
 
+## References
+
+For this report I used Julia Silge's Documentation for Tidy Text Mining: http://juliasilge.com/blog/Life-Changing-Magic/
+http://tidytextmining.com/
+
 ## Data
 
 Load the data
@@ -66,13 +71,18 @@ files3 <- files %>%
 Data Cleaning and Tokenization
 ```{r, tidy = TRUE}
 # Data cleaning
-BcleanAll <- files3 %>%
+cleanAll <- files3 %>%
         mutate(id = str_replace_all(id, c("en_US.twitter.txt" = "Twitter", 
                                              "en_US.news.txt" = "News",
                                              "en_US.blogs.txt" = "Blogs")), 
                text = str_replace_all(text, "\\d+", ""),
                text = str_replace_all(text, "[\r?\n|\røØ]", " ")
-               ) %>%
+               ) 
+head(cleanAll)
+```
+
+```{r}
+WordToken <- cleanAll %>%
         # Tokenization into words
         unnest_tokens(word, text) %>% # separate each line of text into word tokens %>%
         filter(
@@ -80,16 +90,16 @@ BcleanAll <- files3 %>%
                 ,!str_detect(word, "[[:punct:]]")) %>% 
         anti_join(stop_words)
 
-head(BcleanAll, 20)
+head(WordToken, 20)
 ```
 
-==========================================================================================================
+===============================================================================
 
 ## Exploratory analysis
 
 ```{r}
 # most common words in the entire data set
-AllCounts <- BcleanAll %>%
+AllCounts <- WordToken %>%
         group_by(id) %>% #comment to group the data and see the id for each dataset 
         count(word, sort = TRUE) 
 
@@ -120,13 +130,64 @@ tf_graph <- tf_idf %>%
 tf_graph
 ```
 
-==========================================================================================================
+===============================================================================
 ## Understand frequencies of words and words pairs
 
 We've covered words as individual units and considered their frequencies to visualize which were the most common words in the three data  sets. Next step is to build figures and tables to understand variation in the frequencies of words and word pairs in the data.
 
 **2. What are the frequencies of 2-grams and 3-grams in the dataset?
+*n-grams are consecutive sequences of words*
 ```{r}
+BiGrams <- cleanAll %>%
+        # Tokenization into bigrams 
+        unnest_tokens(bigram, text, token = "ngrams", n = 2) %>% # separate each line of text into 2-grams 
+        # filter(
+        #         str_detect(word, "[A-z]{1,}")
+        #         ,!str_detect(word, "[[:punct:]]")) %>% 
+        #  anti_join(stop_words)
+        count(bigram, sort = TRUE)
 
+head(BiGrams, 20)
+
+TriGrams <- BiGrams <- cleanAll %>%
+        # Tokenization into bigrams 
+        unnest_tokens(trigram, text, token = "ngrams", n = 3) %>% # separate each line of text into 2-grams 
+        # filter(
+        #         str_detect(word, "[A-z]{1,}")
+        #         ,!str_detect(word, "[[:punct:]]")) %>% 
+        #  anti_join(stop_words)
+        count(bigram, sort = TRUE)
+
+head(TriGrams, 20)
+```
+
+```{r}
+# code to add to the previous code 
+# below we separate the data into two columns in order to be able to use filters of stop words and strange words
+
+BiGrams_sep <- BiGrams %>%
+        separate(bigram, c("word1", "word2"), sep = " ") 
+
+head(BiGrams_sep)
+
+BiGrams_filtered <- BiGrams_sep %>%
+        filter(str_detect(word1, "[A-z]{1,}")) %>%
+        filter(str_detect(word2, "[A-z]{1,}")) %>%
+        filter(!str_detect(word1, "[[:punct:]]")) %>%
+         filter(!str_detect(word2, "[[:punct:]]")) %>%
+        filter(!word1 %in% stop_words$word) %>%
+        filter(!word2 %in% stop_words$word) %>% 
+        count(word1, word2, sort = TRUE)
+
+BiGrams_filtered
+
+```
+
+
+```{r}
+# tests
+word1 <- c("aaa", "a_ss", "s12ffg", "sss-sss", "s^ss`sà")
+word1
+str_view(word1, "[A-z]{1,}")
 ```
 
