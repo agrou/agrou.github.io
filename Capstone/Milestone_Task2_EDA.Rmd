@@ -87,11 +87,7 @@ cleanAll <- files3 %>%
                #replace all digits with nothing
                text = str_replace_all(text, "\\d+", ""), 
                #replace bullet & html characters, single or double dashes and repeated vowels with a space
-               text = str_replace_all(text, "[\r?\n|\røØ]|[^a-zA-Z0-9_']|\\_|\\b[aeiou]{2,}\\b", " "), 
-               #text = str_replace_all(text, "[^a-zA-Z0-9_']", " "), #replace non-english characters with space
-               #text = str_replace_all(text, "\\_", " "), #replace all extra punctuation with nothing
-               # replace words that are just repetitions of vowels with nothing
-               #text = str_replace_all(text, "\\b[aeiou]{2,}\\b", " "),
+               text = str_replace_all(text, "[\r?\n|\røØ]|[^a-zA-Z0-9_']|\\_|\\b[aeiou]{2,}\\b", " "),
                text = tolower(text)
                ) 
 pander::pander(head(cleanAll))
