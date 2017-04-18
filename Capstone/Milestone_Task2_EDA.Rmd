@@ -1,6 +1,6 @@
 ---
-title: "Milestone report"
-subtitle: "Exploratory data analysis: Relationships between words"
+title: "Milestone Report"
+subtitle: "Task 2: Exploratory data analysis"
 author: agrou
 date: "14 April 2017"
 output: html_document
@@ -46,7 +46,6 @@ library(tidytext)
 library(stringr)
 library(ggthemes)
 library(gridExtra)
-library(hunspell)
 ```
 
 Read the data

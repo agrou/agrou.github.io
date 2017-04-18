@@ -1,0 +1,149 @@
+---
+title: "Milestone report"
+subtitle: "Task3: Modeling"
+author: agrou
+date: "17 April 2017"
+output: html_document
+---
+
+# Milestone Report Scope 
+Understand the distribution and relationship between the words, tokens and phares in the text and build a linguistic predictive model.
+
+# Tasks
+1. Basic n-gram model - predict the next word based on the 1, 2 or 3 words
+2. Build a model to handle unseen n-grams or cases where a particular n-gram isn't observed.
+
+# Questions
+1. How can you efficiently store an n-gram model (think Markov Chains)?
+
+# Summary
+The code below uses the analysis from the file `Milestone:Task2_ExploratoryDataAnalysis`. It corresponds to the *first part of the Milestone report*. To load the data and be able to reproduce the analysis of this *second part of the Milestone report*, you should run the code from the first part of the report.  
+
+# References
+
+For this report I used Julia Silge's Documentation for Tidy Text Mining: http://juliasilge.com/blog/Life-Changing-Magic/
+http://tidytextmining.com/
+Feinerer, Hornik and Meyer. Text Mining Infrastructure in R. Journal of Statistical Software. 2008 (https://www.jstatsoft.org/article/view/v025i05)
+
+
+Load libraries
+```{r libraries, message = FALSE}
+library(tidyverse)
+library(tidytext)
+library(ggthemes)
+library(igraph)
+library(ggraph)
+library(grid)
+```
+
+## 1. How can you efficiently store an n-gram model?
+
+We can use a Markov chain to visualize the relationship between words. Markov chain is a model where each choice of word depends only on the previous one. A word is generated considering the most common words following the previous one. For efficiency I will choose only the most common words to store the n-gram model.
+
+**Bi-grams**
+
+To calculate the most common bi-grams we need to separate the column word into two columns
+```{r}
+BiGrams_sep <- BiGrams %>% 
+        separate(bigram, c("word1", "word2"), sep = " ")
+BiGrams_sep
+```
+
+BiGrams_fil will be a dataset without stop_words as these words are more frequent but not necessarily more important
+```{r}
+BiGrams_fil <- BiGrams_sep %>%
+        filter(!word1 %in% stop_words$word) %>%
+        filter(!word2 %in% stop_words$word)
+BiGrams_fil
+
+BiGrams_count <- BiGrams_fil #Here I give another name to BiGrams_fil to use this dataframe as BiGrams_count later
+```
+
+Filter observations for common combinations and convert it into a dataframe of edges 
+```{r}
+bigram_graph <- BiGrams_count %>%
+        filter(n > 300) %>%
+        graph_from_data_frame()
+bigram_graph
+```
+
+```{r}
+bigram_all_graph <- BiGrams_sep %>%
+        filter(n > 10000) %>%
+        graph_from_data_frame()
+bigram_all_graph
+```
+
+Visualizing a network of bigrams
+```{r}
+set.seed(2017)
+
+ggraph(bigram_graph, layout = "fr") +
+        geom_edge_link(aes(edge_alpha = n), arrow = arrow(length = unit(.10, "inches"), type = "closed")) +
+        geom_node_point(color = "darkgreen", alpha = 0.5, size = 3) +
+        geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
+        ggtitle("Most common bigrams in Twitter, Blogs and News", subtitle = "Each bigram occurs more than 300 times") +
+        theme_void()
+```
+
+```{r}
+set.seed(2017)
+
+ggraph(bigram_all_graph, layout = "fr") +
+        geom_edge_link(aes(edge_alpha = n), arrow = arrow(length = unit(.10, "inches"), type = "closed")) +
+        geom_node_point(color = "darkgreen", alpha = 0.5, size = 3) +
+        geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
+        ggtitle("Most common bigrams in Twitter, Blogs and News (including stopwords)", subtitle = "Each bigram occurs more than 10000 times") +
+        theme_void()
+```
+
+===============================================================================
+
+2. How can you use the knowledge about word frequencies to make your model smaller and more efficient?
+
+We can use 50% of the text corpus, instead of using all the text. Since the most frequent words can happen in a lower proportion than less frequent words, using words that occur in a proportion lower than 50% enables to cover combinations of words that are more meaningful in the model. 
+
+```{r}
+BiGrams_Below50 <- BiGrams_count %>%
+        mutate(prop = n/sum(n), #create variable with the proportion of word frequency in the text corpus
+               row = row_number(), #create variable with to easily see how many words correspond to the previous calculation
+               cumprop = cumsum(prop)) %>% #calculate the cumulative sum of the proportions 
+        filter(cumprop <= .501) %>% #filter 50% of the observations 
+        arrange(desc(cumprop))
+
+BiGrams_Below50
+```
+We observe 472370 unique word combinations
+```{r}
+Below50_Graph <- BiGrams_Below50 %>%
+        filter(n > 300) %>%
+        graph_from_data_frame()
+Below50_Graph
+```
+
+```{r}
+set.seed(2017)
+
+ggraph(Below50_Graph, layout = "fr") +
+        geom_edge_link(aes(edge_alpha = n), arrow = arrow(length = unit(.10, "inches"), type = "closed")) +
+        geom_node_point(color = "darkgreen", alpha = 0.5, size = 3) +
+        geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
+        ggtitle("Most common bigrams in Twitter, Blogs and News", subtitle = "Each word occurs more than 10000 times") +
+        theme_void()
+```
+
+
+## 3. How many parameters do you need (i.e. how big is n in your n-gram model)?
+To be answered...
+
+## 4. Can you think of simple ways to "smooth" the probabilities (think about giving all n-grams a non-zero probability even if they aren't observed in the data) ?
+To be answered...
+
+
+## 5. How do you evaluate whether your model is any good?
+To be answered...
+
+## 6. How can you use backoff models to estimate the probability of unobserved n-grams?
+
+We can apply a discount method to get words with zero probability. Thus we estimate the third word based on the previous two words. 
+First we create a backoff estimate where we apply a discount to probability estimates (counts proportions). This produces results of sets of words with different trigram count probabilities. The corpus is then divided into sets of words such that trigrams have probability equal to zero and sets of words such that trigrams have probability above zero. 
